@@ -1,0 +1,119 @@
+#!/usr/bin/env node
+'use strict';
+
+/*--
+	Sistema de gestiones
+		Este sistema permite gestionar comandos
+		o el mismo server de manera rapida y
+		sencilla.
+
+		Puedes encender o incluso actualizar el
+		servidor con este sistema.
+
+			(c) KevinF15
+--*/
+
+try {
+	require.resolve('colors');
+} catch (e) {
+	if (require.main !== module) throw new Error("Dependencies unmet");
+
+	console.log('\n----- ¡ATENCION! -----');
+	console.log("No se encontro el archivo 'node_modules' y sus dependencias... Resolviendo \n");
+	run('npm install --production');
+	console.log('RESUELTO! Dependencias instaladas.');
+	console.log('-----------------------');
+	run('./server run');
+}
+
+const readline = require('readline');
+const input = require('./plugins/utils/console');
+const ncu = require('npm-check-updates');
+const Config = require('./config/config');
+require('colors');
+
+let consoleInt = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+});
+
+function run(command) {
+	require('child_process').spawnSync('sh', ['-c', command], {stdio: 'inherit'});
+}
+
+function askPush(q, fd) {
+	consoleInt.question(
+		'¿Deseas subir los cambios al repo. (' + 'git push'.green + ')? (si/no) \n' +
+		'TU: '.yellow, function (answer) {
+		if (answer in {'no': 1}) {
+			consoleInt.close();
+			return process.exit(-1);
+		}
+		if (answer in {'si': 1}) {
+			run('git push');
+			consoleInt.close();
+			return process.exit(-1);
+			
+		}
+	});
+}
+
+function askUpdate(q, fd) {
+	consoleInt.question(
+		'¿Deseas crear la rama remota' + ' main-repo '.yellow + '?. (si/no) \n' +
+	   'TU: '.yellow, function (answer) {
+		if (answer in {'no': 1, 'No': 1}) {
+			run('git fetch main-repo');
+			run('git merge main-repo/master');
+			input.info('Si hay conflictos procede a resolverlos.');
+			askPush();
+		}
+
+		if (answer in {'si': 1, 'Si': 1}) {
+			run('git remote add main-repo https://github.com/Zarel/Pokemon-Showdown.git');
+			input.custom('OK \t'.green,'Rama creada con exito.');
+			run('git fetch main-repo');
+			run('git merge main-repo/master');
+			input.info('Si hay conflictos procede a resolverlos.');
+			askPush();
+		}
+	});
+}
+
+if (!process.argv[2]) {// Informacion y ayuda
+	console.log(
+		'\nBienvenido al SGRDS.\n'.green.underline,
+		'----------\n'.grey.bold,
+		'El SGRDS es un sistema creado para facilitar las acciones\n',
+		'de la consola usando comandos ya elaborados.\n',
+		'----------\n'.grey.bold,
+		'¿Necesitas ayuda?\n'.magenta.bold,
+		'Los comandos de este sistema se ejecutan con' + ' ./server <comando>\n'.magenta.bold,
+		'\ton/run'.magenta.bold + ' - Enciende el servidor.\n',
+		'\tupdate'.magenta.bold + ' - Sincroniza los archivos del servidor con los del main.\n',
+		'\tcheckdeps'.magenta.bold + ' - Has un checkeo de las dependencias.\n'
+	);
+	return process.exit(1);
+} else if (process.argv[2] === 'on' || process.argv[2] === 'run') { // Inicio del servidor
+	run('node app.js');
+} else if (process.argv[2] === 'update') { // Sincronizacion de archivos con el main
+	if (Config.inOpenshift === true) {
+		console.log('¡ATENCION!'.red.bold + '\t' + 'No se puede usar esta herramienta mientras se esta en openshift.');
+		return process.exit(1);
+	}
+	
+	input.custom(
+		'Iniciando actualización y sincronización de archivos. \n'.green,
+		'----------------------------------------'.green 
+	);
+	askUpdate();
+} else if (process.argv[2] === 'checkdeps') {
+	ncu.run({
+    	packageFile: 'package.json',
+    	silent: true,
+    	jsonUpgraded: true
+	}).then((upgraded) => {
+    	console.log('Dependencias a actualizar: ', upgraded);
+    	return process.exit(-1);
+	});
+}

@@ -1,0 +1,70 @@
+{
+  "name": "Ps-Openshift",
+  "description": "Servidor de Pokemon Showdown hosteable en Openshift",
+  "version": "1.0.1",
+
+  "dependencies": {
+    "colors": "1.1.2",
+    "MD5": "1.3.0",
+    "node-serialize": "0.0.4",
+    "request": "2.79.0",
+    "sockjs": "0.3.18",
+    "yamljs": "0.2.8",
+    "ws": "1.1.1"
+  },
+
+  "optionalDependencies": {
+    "cloud-env": "0.2.2",
+    "http-proxy": "1.16.2",
+    "nodemailer": "2.7.0",
+    "node-static": "0.7.9"
+  },
+
+  "nonDefaultDependencies": {
+    "ofe": "0.5.1"
+  },
+
+  "devDependencies": {
+    "eslint": "3.12.2",
+    "mocha": "3.2.0",
+    "mock-fs-require-fix": "~1.0.0",
+    "npm-check-updates": "2.8.9",
+    "fuzzur": "0.1.2"
+  },
+
+  "engines": {
+    "node": "7.4.0"
+  },
+
+  "main": "app.js",
+
+  "scripts": {
+    "start": "node app.js",
+    "test": "ncu && eslint --rulesdir=dev-tools/eslint --fix --cache . && mocha"
+  },
+
+  "bin": "./server",
+
+  "homepage": "ps-kevinf15.rhcloud.com/info.html",
+
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/KevinF15/ps-openshift"
+  },
+
+  "author": {
+    "name": "Kevin Falcón",
+    "email": "kevin.af09@gmail.com",
+    "url": "https://github.com/KevinF15"
+  },
+
+  "contributors": [
+    {
+      "name": "Guangcong Luo",
+      "email": "guangcongluo@gmail.com",
+      "url": "http://guangcongluo.com"
+    }
+  ],
+
+  "private": true
+}
